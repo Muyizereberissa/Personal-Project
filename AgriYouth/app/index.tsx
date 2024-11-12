@@ -30,13 +30,15 @@ export default function Index() {
       id: "2",
       image: require("../assets/images/onboard1.jpeg"),
       title: "Innovate and Cultivate",
-      subtitle: "Bring your fresh ideas to the field. Together, we’re transforming agriculture for a sustainable tomorrow",
+      subtitle:
+        "Bring your fresh ideas to the field. Together, we’re transforming agriculture for a sustainable tomorrow",
     },
     {
       id: "3",
       image: require("../assets/images/onboard4.jpeg"),
       title: "From Seed to Success",
-      subtitle: "Join a community that nurtures your journey in agriculture. Your passion can make a difference.",
+      subtitle:
+        "Join a community that nurtures your journey in agriculture. Your passion can make a difference.",
     },
   ];
 
@@ -87,7 +89,13 @@ export default function Index() {
           paddingHorizontal: 20,
         }}
       >
-        <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 80 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginTop: 80,
+          }}
+        >
           {slides.map((_, index) => (
             <View
               key={index}
@@ -124,17 +132,29 @@ export default function Index() {
               <TouchableOpacity
                 style={[
                   styles.btn,
-                  { backgroundColor: "transparent", borderWidth: 1, borderColor: darkMode ? "white" : "black" },
+                  {
+                    backgroundColor: "transparent",
+                    borderWidth: 1,
+                    borderColor: darkMode ? "white" : "black",
+                  },
                 ]}
                 onPress={Skip}
               >
-                <Text style={{ color: darkMode ? "white" : "black", fontSize: 15, fontWeight: "bold" }}>
+                <Text
+                  style={{
+                    color: darkMode ? "white" : "black",
+                    fontSize: 15,
+                    fontWeight: "bold",
+                  }}
+                >
                   Skip
                 </Text>
               </TouchableOpacity>
               <View style={{ width: 15 }} />
               <TouchableOpacity style={styles.btn} onPress={goNextSlide}>
-                <Text style={{ color: "white", fontSize: 15, fontWeight: "bold" }}>
+                <Text
+                  style={{ color: "white", fontSize: 15, fontWeight: "bold" }}
+                >
                   Next
                 </Text>
               </TouchableOpacity>
@@ -168,14 +188,26 @@ export default function Index() {
   };
 
   const handleGetStarted = () => {
-    router.push("/Register"); 
+    router.push("/Register");
   };
 
   const ref = useRef(null);
 
   return (
-    <SafeAreaView style={[styles.container, darkMode ? styles.darkContainer : styles.lightContainer]}>
-      <Text style={{ color: darkMode ? "#fff" : "#000", fontSize: 24, textAlign: "center", marginVertical: 20 }}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        darkMode ? styles.darkContainer : styles.lightContainer,
+      ]}
+    >
+      <Text
+        style={{
+          color: darkMode ? "#fff" : "#000",
+          fontSize: 24,
+          textAlign: "center",
+          marginVertical: 20,
+        }}
+      >
         Onboarding screen
       </Text>
       <FlatList
@@ -201,10 +233,10 @@ const styles = StyleSheet.create({
     alignContent: "center",
   },
   darkContainer: {
-    backgroundColor: "#000", 
+    backgroundColor: "#000",
   },
   lightContainer: {
-    backgroundColor: "#FFFFFF", 
+    backgroundColor: "#FFFFFF",
   },
   indicator: {
     height: 2.5,

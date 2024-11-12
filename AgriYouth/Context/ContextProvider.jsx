@@ -39,12 +39,16 @@ export default function ThemeContext({ children }) {
       setCurrentUser(user);
     });
     
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => unsubscribe(); 
   }, []);
 
   const toggleDarkMode = () => {
-    setDarkMode((prevMode) => !prevMode);
+    setDarkMode((prevMode) => {
+      console.log("Dark mode toggled:", !prevMode); // Log the new state
+      return !prevMode;
+    });
   };
+  
 
   const register = async (email, password) => {
     try {

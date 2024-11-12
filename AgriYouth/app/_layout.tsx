@@ -7,7 +7,7 @@ import BottomTabs from './BottomTabs'
 export default function RootLayout() {
   return (
     <ThemeContext>
-      <Header/>
+      {/* <Header/> */}
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index"  />
         <Stack.Screen name="OnboardingScreen"/>
@@ -15,7 +15,7 @@ export default function RootLayout() {
         <Stack.Screen name="Register" />
         <Stack.Screen name="ForgotPassword" />
         <Stack.Screen name="BottomTabs"/>
-        <Stack.Screen name="UpdateProfile" />
+        <Stack.Screen name="UpdateProfile"/>
       </Stack>
     </ThemeContext>
   );
