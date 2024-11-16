@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-nativ
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { UseAuth } from "../Context/ContextProvider";
+import { FontAwesome } from "@expo/vector-icons"; // Import for Google and Twitter icons
 
 export default function Register() {
   const initialValues = { username: "", email: "", password: "" };
@@ -102,6 +103,26 @@ export default function Register() {
         <Text style={styles.buttonText}>Create User</Text>
       </TouchableOpacity>
 
+      <View style={styles.dividerContainer}>
+        <View style={styles.line} />
+        <Text style={[styles.dividerText, darkMode ? styles.darkText : styles.lightText]}>
+          or register with
+        </Text>
+        <View style={styles.line} />
+      </View>
+
+      <View style={styles.socialLoginContainer}>
+        <TouchableOpacity style={styles.socialButton}>
+          <FontAwesome name="google" size={30} color="#DB4437" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.socialButton}>
+          <FontAwesome name="facebook" size={30} color="#4267B2" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.socialButton}>
+          <FontAwesome name="twitter" size={30} color="#1DA1F2" />
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.loginLinkContainer}>
         <Text style={styles.loginText}>Already have an account?</Text>
         <Text style={styles.linkText} onPress={() => navigation.navigate("Login")}>
@@ -171,20 +192,49 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 20,
   },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 60,
+    marginBottom: 20,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#999",
+  },
+  dividerText: {
+    marginHorizontal: 10,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  darkText: {
+    color: "#ccc",
+  },
+  lightText: {
+    color: "#666",
+  },
+  socialLoginContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 30
+  },
+  socialButton: {
+    marginHorizontal: 15,
+  },
   loginLinkContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 20,
-    fontSize: 20
+    marginTop: 30,
   },
   loginText: {
     color: "#333",
-    fontSize: 20
+    fontSize: 20,
   },
   linkText: {
     color: "#1E992C",
     marginLeft: 5,
     fontWeight: "bold",
-    fontSize: 20
+    fontSize: 20,
   },
 });

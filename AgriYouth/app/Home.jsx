@@ -1,80 +1,343 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, TextInput } from "react-native";
-import Icon from 'react-native-vector-icons/FontAwesome'; // Make sure you have installed the FontAwesome package
-import { FIREBASE_DB } from "../FirebaseConfig"; // make sure firebase is configured here
-import { collection, getDocs } from "firebase/firestore";
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  Modal,
+  Button,
+} from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { FIREBASE_DB } from "../FirebaseConfig";
+import { collection, getDocs, addDoc, updateDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { UseAuth } from "../Context/ContextProvider"; // Import context
 
 export default function HomePage() {
+  const { darkMode } = UseAuth(); // Access dark mode from context
   const [categories, setCategories] = useState([]);
+  const [ideas, setIdeas] = useState([]); // State for posted ideas
   const [searchQuery, setSearchQuery] = useState("");
-  const [darkMode, setDarkMode] = useState(false); // Toggle dark mode
+  const [isJoinModalVisible, setJoinModalVisible] = useState(false);
+  const [isPostIdeaModalVisible, setPostIdeaModalVisible] = useState(false);
+  const [isInvestModalVisible, setInvestModalVisible] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedIdea, setSelectedIdea] = useState(null); // Selected idea for investment
+  const [ideaContent, setIdeaContent] = useState("");
+  const [investmentAmount, setInvestmentAmount] = useState(""); // State to track the investment amount
 
-  // Fetch categories from Firestore
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const categoryCollection = collection(FIREBASE_DB, "AgricultureCategories");
+        const categoryCollection = collection(
+          FIREBASE_DB,
+          "AgricultureCategories"
+        );
         const categorySnapshot = await getDocs(categoryCollection);
-        const categoryList = categorySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const categoryList = categorySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         setCategories(categoryList);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
     };
 
+    const fetchIdeas = async () => {
+      try {
+        const ideaCollection = collection(FIREBASE_DB, "Ideas");
+        const ideaSnapshot = await getDocs(ideaCollection);
+        const ideaList = ideaSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setIdeas(ideaList);
+      } catch (error) {
+        console.error("Error fetching ideas:", error);
+      }
+    };
+
     fetchCategories();
+    fetchIdeas();
   }, []);
 
-  const handleSearch = (text) => {
-    setSearchQuery(text);
+  const handleSearch = (text) => setSearchQuery(text);
+
+  const handleJoinGroup = async (categoryId) => {
+    if (!currentUser) {
+      alert("You need to be logged in to join a group.");
+      return;
+    }
+    try {
+      await addDoc(collection(FIREBASE_DB, "JoinedGroups"), {
+        userId: currentUser.uid,
+        categoryId,
+      });
+      alert("Successfully joined the group!");
+      console.log("Group joined successfully for category:", categoryId);
+    } catch (error) {
+      console.error("Error joining group:", error);
+      alert("Error joining group. Check the console for details.");
+    }
+    setJoinModalVisible(false);
   };
 
-  const filteredCategories = categories.filter((item) => {
-    return item.title.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  const handlePostIdea = async () => {
+    if (!currentUser) {
+      alert("You need to be logged in to post an idea.");
+      return;
+    }
+    if (!ideaContent.trim()) {
+      alert("Please enter a valid idea.");
+      return;
+    }
+    try {
+      await addDoc(collection(FIREBASE_DB, "Ideas"), {
+        userId: currentUser.uid,
+        categoryId: selectedCategory.id,
+        content: ideaContent,
+        timestamp: new Date(),
+      });
+      alert("Idea posted successfully!");
+      setIdeaContent("");
+      setPostIdeaModalVisible(false);
+    } catch (error) {
+      console.error("Error posting idea:", error);
+      alert("Error posting idea. Check the console for details.");
+    }
+  };
+
+  const handleCreateInvestment = async (ideaId) => {
+    if (!currentUser) {
+      alert("You need to be logged in to make an investment.");
+      return;
+    }
+    if (!investmentAmount.trim()) {
+      alert("Please enter a valid investment amount.");
+      return;
+    }
+    try {
+      await addDoc(collection(FIREBASE_DB, "Investments"), {
+        userId: currentUser.uid,
+        ideaId,
+        investmentAmount,
+        timestamp: new Date(),
+      });
+      alert("Investment has been recorded!");
+      setInvestmentAmount("");
+      setInvestModalVisible(false);
+    } catch (error) {
+      console.error("Error creating investment:", error);
+      alert("Error creating investment. Check the console for details.");
+    }
+  };
+
+  const filteredCategories = categories.filter((item) =>
+    item.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <View style={[styles.container, darkMode ? styles.darkMode : styles.lightMode]}>
-      {/* Search Bar with Icons */}
-      <View style={[styles.searchContainer, darkMode ? styles.darkSearch : styles.lightSearch]}>
-        <Icon name="search" size={20} color={darkMode ? "#888" : "#666"} style={styles.searchIcon} />
-        <TextInput 
-          style={styles.searchInput} 
+    <View
+      style={[styles.container, darkMode ? styles.darkMode : styles.lightMode]}
+    >
+      {/* Search Bar */}
+      <View
+        style={[
+          styles.searchContainer,
+          darkMode ? styles.darkSearch : styles.lightSearch,
+        ]}
+      >
+        <Icon
+          name="search"
+          size={20}
+          color={darkMode ? "#888" : "#666"}
+          style={styles.searchIcon}
+        />
+        <TextInput
+          style={[
+            styles.searchInput,
+            darkMode ? styles.darkText : styles.lightText,
+          ]}
           placeholder="Search Categories..."
           placeholderTextColor={darkMode ? "#888" : "#666"}
           value={searchQuery}
           onChangeText={handleSearch}
         />
-        <Icon name="microphone" size={20} color={darkMode ? "#888" : "#666"} style={styles.micIcon} />
       </View>
 
-      {/* Title Section */}
-      <Text style={[styles.title, darkMode ? styles.darkText : styles.lightText]}>Explore Agriculture Categories</Text>
+      {/* Title */}
+      <Text
+        style={[styles.title, darkMode ? styles.darkText : styles.lightText]}
+      >
+        Explore Agriculture Categories
+      </Text>
 
-      {/* Horizontal Scrollable List of Categories */}
+      {/* Horizontal Scrollable Categories */}
       <FlatList
         data={filteredCategories}
         horizontal
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={[styles.card, darkMode ? styles.darkCard : styles.lightCard]}>
+          <View
+            style={[styles.card, darkMode ? styles.darkCard : styles.lightCard]}
+          >
             <Image source={{ uri: item.imageUrl }} style={styles.image} />
-            <View style={styles.overlay}>
-              <Text style={[styles.cardTitle, darkMode ? styles.darkCardText : styles.lightCardText]}>
-                {item.title}
-              </Text>
-            </View>
-            <Text style={[styles.description, darkMode ? styles.darkText : styles.lightText]}>{item.description}</Text>
-            <TouchableOpacity
-              style={[styles.joinButton, darkMode ? styles.darkButton : styles.lightButton]}
-              onPress={() => console.log("Joining group:", item.title)}
+            <Text
+              style={[
+                styles.cardTitle,
+                darkMode ? styles.darkCardText : styles.lightCardText,
+              ]}
             >
-              <Text style={styles.joinButtonText}>Join Group</Text>
+              {item.title}
+            </Text>
+            <Text
+              style={[
+                styles.description,
+                darkMode ? styles.darkCardText : styles.lightCardText,
+              ]}
+            >
+              {item.description}
+            </Text>
+            <View style={styles.buto}>
+              <TouchableOpacity
+                style={[
+                  styles.joinButton,
+                  darkMode ? styles.darkButton : styles.lightButton,
+                ]}
+                onPress={() => {
+                  setSelectedCategory(item);
+                  setJoinModalVisible(true);
+                }}
+              >
+                <Text style={styles.joinButtonText}>Join Group</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.joinButton,
+                  darkMode ? styles.darkButton : styles.lightButton,
+                ]}
+                onPress={() => {
+                  setSelectedCategory(item);
+                  setPostIdeaModalVisible(true);
+                }}
+              >
+                <Text style={styles.joinButtonText}>Post Idea</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      />
+
+      {/* Ideas Section */}
+     
+      <Text
+        style={[styles.title, darkMode ? styles.darkText : styles.lightText]}
+      >
+        Posted Ideas
+      </Text>
+      <FlatList
+        data={ideas}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View
+            style={[ darkMode ? styles.darkCard : styles.lightCard]}
+          >
+            <Text
+              style={[
+                styles.cardTitle,
+                darkMode ? styles.darkCardText : styles.lightCardText,
+              ]}
+            >
+              {item.content}
+            </Text>
+            <TouchableOpacity
+              style={[
+                styles.joinButton,
+                darkMode ? styles.darkButton : styles.lightButton,
+              ]}
+              onPress={() => {
+                setSelectedIdea(item);
+                setInvestModalVisible(true);
+              }}
+            >
+              <Text style={styles.joinButtonText}>Invest</Text>
             </TouchableOpacity>
           </View>
         )}
       />
+
+      {/* Modals */}
+      <Modal visible={isJoinModalVisible} transparent animationType="slide">
+        <View style={styles.modalView}>
+          <Text style={styles.modalTitle}>Join {selectedCategory?.title}</Text>
+          <Button
+            title="Confirm Join"
+            onPress={() => handleJoinGroup(selectedCategory.id)}
+          />
+          <Button
+            title="Cancel"
+            color="red"
+            onPress={() => setJoinModalVisible(false)}
+          />
+        </View>
+      </Modal>
+
+      <Modal visible={isInvestModalVisible} transparent animationType="slide">
+        <View style={styles.modalView}>
+          <Text style={styles.modalTitle}>Invest in Idea</Text>
+          <TextInput
+            style={[
+              styles.ideaInput,
+              darkMode ? styles.darkText : styles.lightText,
+            ]}
+            placeholder="Enter investment amount"
+            placeholderTextColor={darkMode ? "#888" : "#666"}
+            value={investmentAmount}
+            onChangeText={setInvestmentAmount}
+            keyboardType="numeric"
+          />
+          <Button
+            title="Invest"
+            onPress={() => handleCreateInvestment(selectedIdea.id)}
+          />
+          <Button
+            title="Cancel"
+            color="red"
+            onPress={() => setInvestModalVisible(false)}
+          />
+        </View>
+      </Modal>
+
+      <Modal visible={isPostIdeaModalVisible} transparent animationType="slide">
+        <View style={styles.modalView}>
+          <Text style={styles.modalTitle}>Post Your Idea</Text>
+          <TextInput
+            style={[
+              styles.ideaInput,
+              darkMode ? styles.darkText : styles.lightText,
+            ]}
+            placeholder="Enter your idea"
+            placeholderTextColor={darkMode ? "#888" : "#666"}
+            value={ideaContent}
+            onChangeText={setIdeaContent}
+            multiline
+          />
+          <Button title="Post Idea" onPress={handlePostIdea} />
+          <Button
+            title="Cancel"
+            color="red"
+            onPress={() => setPostIdeaModalVisible(false)}
+          />
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -82,43 +345,20 @@ export default function HomePage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-  },
-  darkMode: {
-    backgroundColor: "#121212",
-  },
-  lightMode: {
-    backgroundColor: "#fff",
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-  darkSearch: {
-    backgroundColor: "#333",
-  },
-  lightSearch: {
-    backgroundColor: "#f0f0f0",
-  },
-  searchInput: {
-    height: 40,
-    flex: 1,
-    paddingLeft: 10,
-    fontSize: 16,
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  micIcon: {
-    marginLeft: 10,
+    padding: 16,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  // post: {}
+  darkMode: {
+    backgroundColor: "#222",
+  },
+  lightMode: {
+    backgroundColor: "#f9f9f9",
   },
   darkText: {
     color: "#fff",
@@ -126,48 +366,152 @@ const styles = StyleSheet.create({
   lightText: {
     color: "#333",
   },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#eaeaea",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 20,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    color: "#333",
+  },
   card: {
-    width: 250,
-    marginRight: 15,
-    padding: 15,
-    borderRadius: 10,
-    overflow: "hidden",
-  },
-  darkCard: {
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "#fff",
+    borderRadius: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 5,
-  },
-  lightCard: {
-    backgroundColor: "#f8f9fa",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    alignItems: "center",
+    flexDirection: "column",
+    maxWidth: 320,
+    paddingHorizontal: 10
   },
   image: {
-    width: "100%",
-    height: 150,
-    borderRadius: 10,
-  },
-  overlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    width: "100%",
-    height: "30%",
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    justifyContent: "center",
-    paddingHorizontal: 10,
+    width: 300,
+    height: 180,
+    borderRadius: 12,
+    marginBottom: 16,
+    position: 'relative'
   },
   cardTitle: {
-    color: "#fff",
-    fontSize: 18,
+    fontSize: 25,
     fontWeight: "bold",
+    position: 'absolute',
+    bottom: 175,    
+    left: 5,      
+    color: 'white',
+    padding: 8    
+  },
+  
+  description: {
+    fontSize: 16,
+    color: "#666",
+    // textAlign: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 10,
+  },
+  joinButton: {
+    backgroundColor: "#4CAF50",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginVertical: 6,
+    width: "40%",
+    alignItems: "center",
+    marginHorizontal: 10,
+  },
+  joinButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  modalView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    padding: 24,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  ideaInput: {
+    width: "80%",
+    padding: 12,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    marginBottom: 20,
+    fontSize: 16,
+    color: "#333",
+  },
+  modalButton: {
+    backgroundColor: "#4CAF50",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginVertical: 6,
+    width: "80%",
+    alignItems: "center",
+  },
+  modalButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  cancelButton: {
+    backgroundColor: "red",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginVertical: 6,
+    width: "80%",
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  joinButtonContainer: {
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  modalInputContainer: {
+    width: "80%",
+    marginBottom: 20,
+  },
+  modalActionContainer: {
+    width: "100%",
+    alignItems: "center",
+  },
+
+  // Specific tweaks for dark mode
+  darkCard: {
+    backgroundColor: "#333",
+  },
+  lightCard: {
+    backgroundColor: "#fff",
   },
   darkCardText: {
     color: "#fff",
@@ -175,25 +519,26 @@ const styles = StyleSheet.create({
   lightCardText: {
     color: "#333",
   },
-  description: {
-    fontSize: 14,
-    textAlign: "center",
-    marginVertical: 10,
-  },
   darkButton: {
     backgroundColor: "#4CAF50",
   },
   lightButton: {
     backgroundColor: "#4CAF50",
   },
-  joinButton: {
-    padding: 10,
-    borderRadius: 5,
-    width: "100%",
-    alignItems: "center",
+  darkSearch: {
+    backgroundColor: "#444",
   },
-  joinButtonText: {
+  lightSearch: {
+    backgroundColor: "#eaeaea",
+  },
+  darkButtonText: {
     color: "#fff",
-    fontWeight: "bold",
   },
+  lightButtonText: {
+    color: "#fff",
+  },
+  buto: {
+    display: 'flex',
+    flexDirection: 'row'
+  }
 });

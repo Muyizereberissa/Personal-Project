@@ -57,7 +57,6 @@ export default function Login() {
 
   return (
     <View style={[styles.container, darkMode ? styles.dark : styles.light]}>
-      <View style={styles.formContainer}>
         <Text style={styles.title}>Log in</Text>
 
         <View style={styles.inputWrapper}>
@@ -92,6 +91,20 @@ export default function Login() {
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
+        <View/>
+          <Text style={styles.orText}>Or log in with</Text>
+        <View/>
+        <View style={styles.socialIconsContainer}>
+          <TouchableOpacity style={styles.socialIcon}>
+            <Icon name="google" size={30} color="#DB4437" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.socialIcon}>
+            <Icon name="facebook" size={30} color="#4267B2" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.socialIcon}>
+            <Icon name="twitter" size={30} color="#1DA1F2" />
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.signupContainer}>
           <Text style={styles.signupText}>Don't have an account?</Text>
@@ -99,7 +112,7 @@ export default function Login() {
             <Text style={styles.linkText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
-      </View>
+     
     </View>
   );
 }
@@ -108,15 +121,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center", // Center the form horizontally
-    padding: 20,
-  },
-  formContainer: {
     alignItems: "center",
-    width: "100%",
-    maxWidth: 400, 
-    borderRadius: 10,
-    backgroundColor: "#f8f9fa", 
+    padding: 20,
   },
   title: {
     fontSize: 28,
@@ -157,7 +163,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   forgotPassword: {
-    alignSelf: "flex-end", 
+    alignSelf: "flex-end",
     marginBottom: 10,
     marginTop: -5,
   },
@@ -180,6 +186,20 @@ const styles = StyleSheet.create({
     marginTop: -5,
     marginBottom: 5,
     alignSelf: "flex-start",
+  },
+  orText: {
+    marginVertical: 15,
+    fontSize: 16,
+    color: "#555",
+  },
+  socialIconsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  socialIcon: {
+    marginHorizontal: 10,
   },
   dark: {
     backgroundColor: "#333",
