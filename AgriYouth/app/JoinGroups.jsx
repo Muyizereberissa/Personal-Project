@@ -18,10 +18,10 @@ import { UseAuth } from "../Context/ContextProvider"; // Import context
 import PostedIdeas from "./PostedIdeas";
 import { useNavigation } from "@react-navigation/native";
 
-export default function HomePage() {
-  const { darkMode } = UseAuth();
+export default function JoinGroups() {
+  const { darkMode } = UseAuth(); 
   const [categories, setCategories] = useState([]);
-  const [ideas, setIdeas] = useState([]);
+  const [ideas, setIdeas] = useState([]); 
   const [searchQuery, setSearchQuery] = useState("");
   const [isJoinModalVisible, setJoinModalVisible] = useState(false);
   const [isPostIdeaModalVisible, setPostIdeaModalVisible] = useState(false);
@@ -29,7 +29,7 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedIdea, setSelectedIdea] = useState(null); // Selected idea for investment
   const [ideaContent, setIdeaContent] = useState("");
-  const [investmentAmount, setInvestmentAmount] = useState("");
+  const [investmentAmount, setInvestmentAmount] = useState(""); 
   const navigation = useNavigation();
   const auth = getAuth();
   const currentUser = auth.currentUser;
@@ -149,51 +149,11 @@ export default function HomePage() {
     <View
       style={[styles.container, darkMode ? styles.darkMode : styles.lightMode]}
     >
-      {/* Search Bar */}
-      {/* <PostedIdeas />  */}
-      {/* Icon to access posted ideas */}
-
-      <View
-        style={[
-          styles.searchContainer,
-          darkMode ? styles.darkSearch : styles.lightSearch,
-        ]}
-      >
-        <Icon
-          name="search"
-          size={20}
-          color={darkMode ? "#888" : "#666"}
-          style={styles.searchIcon}
-        />
-        <TextInput
-          style={[
-            styles.searchInput,
-            darkMode ? styles.darkText : styles.lightText,
-          ]}
-          placeholder="Search Categories..."
-          placeholderTextColor={darkMode ? "#888" : "#666"}
-          value={searchQuery}
-          onChangeText={handleSearch}
-        />
-      </View>
-      <View style={styles.icons}>
-        <TouchableOpacity onPress={() => navigation.navigate("PostedIdeas")}>
-          <Icon name="book" size={24} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("JoinGroups")}>
-          <Icon name="book" size={24} />
-        </TouchableOpacity>
-      </View>
-      <Text
-        style={[styles.title, darkMode ? styles.darkText : styles.lightText]}
-      >
-        Explore Agriculture Categories
-      </Text>
-
+        <View />
       <FlatList
         data={filteredCategories}
-        horizontal
-        showsHorizontalScrollIndicator={false}
+        vertical
+        showsVerticalScrollIndicator={false}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View
@@ -216,10 +176,53 @@ export default function HomePage() {
             >
               {item.description}
             </Text>
-            
+            <View style={styles.buto}>
+              <TouchableOpacity
+                style={[
+                  styles.joinButton,
+                  darkMode ? styles.darkButton : styles.lightButton,
+                ]}
+                onPress={() => {
+                  setSelectedCategory(item);
+                  setJoinModalVisible(true);
+                }}
+              >
+                <Text style={styles.joinButtonText}>Join Group</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.joinButton,
+                  darkMode ? styles.darkButton : styles.lightButton,
+                ]}
+                onPress={() => {
+                  setSelectedCategory(item);
+                  setPostIdeaModalVisible(true);
+                }}
+              >
+                <Text style={styles.joinButtonText}>Post Idea</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       />
+
+ 
+
+      {/* Modals */}
+      <Modal visible={isJoinModalVisible} transparent animationType="slide">
+        <View style={styles.modalView}>
+          <Text style={styles.modalTitle}>Join {selectedCategory?.title}</Text>
+          <Button
+            title="Confirm Join"
+            onPress={() => handleJoinGroup(selectedCategory.id)}
+          />
+          <Button
+            title="Cancel"
+            color="red"
+            onPress={() => setJoinModalVisible(false)}
+          />
+        </View>
+      </Modal>
       <Modal visible={isPostIdeaModalVisible} transparent animationType="slide">
         <View style={styles.modalView}>
           <Text style={styles.modalTitle}>Post Your Idea</Text>
@@ -250,11 +253,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-  },
-  icons: { 
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between'
   },
   title: {
     fontSize: 24,
@@ -306,23 +304,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "column",
     maxWidth: 320,
-    paddingHorizontal: 10,
+    paddingHorizontal: 10
   },
   image: {
     width: 300,
     height: 180,
     borderRadius: 12,
     marginBottom: 16,
-    position: "relative",
+    position: 'relative'
   },
   cardTitle: {
     fontSize: 25,
     fontWeight: "bold",
-    position: "absolute",
-    color: "#000",
-    padding: 8,
+    position: 'absolute',
+    bottom: 175,
+    left: 5,      
+    color: '#000', 
+    padding: 8    
   },
-
+  
   description: {
     fontSize: 16,
     color: "#666",
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   buto: {
-    display: "flex",
-    flexDirection: "row",
-  },
+    display: 'flex',
+    flexDirection: 'row'
+  }
 });

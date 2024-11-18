@@ -16,6 +16,8 @@ export default function RootLayout() {
         <Stack.Screen name="ForgotPassword" />
         <Stack.Screen name="BottomTabs"/>
         <Stack.Screen name="UpdateProfile"/>
+        <Stack.Screen name="PostedIdeas"/>
+        <Stack.Screen name="JoinGroups"/>
       </Stack>
     </ThemeContext>
   );
