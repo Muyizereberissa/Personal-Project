@@ -12,35 +12,28 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { FIREBASE_DB } from "../FirebaseConfig";
-import { collection, getDocs, addDoc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { UseAuth } from "../Context/ContextProvider"; // Import context
-import PostedIdeas from "./PostedIdeas";
+import { UseAuth } from "../Context/ContextProvider";
 import { useNavigation } from "@react-navigation/native";
 
 export default function HomePage() {
   const { darkMode } = UseAuth();
   const [categories, setCategories] = useState([]);
-  const [ideas, setIdeas] = useState([]);
+  const [mentors, setMentors] = useState([]); // State for mentors
   const [searchQuery, setSearchQuery] = useState("");
-  const [isJoinModalVisible, setJoinModalVisible] = useState(false);
   const [isPostIdeaModalVisible, setPostIdeaModalVisible] = useState(false);
-  const [isInvestModalVisible, setInvestModalVisible] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedIdea, setSelectedIdea] = useState(null); // Selected idea for investment
   const [ideaContent, setIdeaContent] = useState("");
-  const [investmentAmount, setInvestmentAmount] = useState("");
+
   const navigation = useNavigation();
   const auth = getAuth();
   const currentUser = auth.currentUser;
 
+  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const categoryCollection = collection(
-          FIREBASE_DB,
-          "AgricultureCategories"
-        );
+        const categoryCollection = collection(FIREBASE_DB, "AgricultureCategories");
         const categorySnapshot = await getDocs(categoryCollection);
         const categoryList = categorySnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -51,113 +44,34 @@ export default function HomePage() {
         console.error("Error fetching categories:", error);
       }
     };
+    fetchCategories();
+  }, []);
 
-    const fetchIdeas = async () => {
+  // Fetch mentors
+  useEffect(() => {
+    const fetchMentors = async () => {
       try {
-        const ideaCollection = collection(FIREBASE_DB, "Ideas");
-        const ideaSnapshot = await getDocs(ideaCollection);
-        const ideaList = ideaSnapshot.docs.map((doc) => ({
+        const mentorCollection = collection(FIREBASE_DB, "Mentors");
+        const mentorSnapshot = await getDocs(mentorCollection);
+        const mentorList = mentorSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setIdeas(ideaList);
+        setMentors(mentorList);
       } catch (error) {
-        console.error("Error fetching ideas:", error);
+        console.error("Error fetching mentors:", error);
       }
     };
-
-    fetchCategories();
-    fetchIdeas();
+    fetchMentors();
   }, []);
 
   const handleSearch = (text) => setSearchQuery(text);
 
-  const handleJoinGroup = async (categoryId) => {
-    if (!currentUser) {
-      alert("You need to be logged in to join a group.");
-      return;
-    }
-    try {
-      await addDoc(collection(FIREBASE_DB, "JoinedGroups"), {
-        userId: currentUser.uid,
-        categoryId,
-      });
-      alert("Successfully joined the group!");
-      console.log("Group joined successfully for category:", categoryId);
-    } catch (error) {
-      console.error("Error joining group:", error);
-      alert("Error joining group. Check the console for details.");
-    }
-    setJoinModalVisible(false);
-  };
-
-  const handlePostIdea = async () => {
-    if (!currentUser) {
-      alert("You need to be logged in to post an idea.");
-      return;
-    }
-    if (!ideaContent.trim()) {
-      alert("Please enter a valid idea.");
-      return;
-    }
-    try {
-      await addDoc(collection(FIREBASE_DB, "Ideas"), {
-        userId: currentUser.uid,
-        categoryId: selectedCategory.id,
-        content: ideaContent,
-        timestamp: new Date(),
-      });
-      alert("Idea posted successfully!");
-      setIdeaContent("");
-      setPostIdeaModalVisible(false);
-    } catch (error) {
-      console.error("Error posting idea:", error);
-      alert("Error posting idea. Check the console for details.");
-    }
-  };
-
-  const handleCreateInvestment = async (ideaId) => {
-    if (!currentUser) {
-      alert("You need to be logged in to make an investment.");
-      return;
-    }
-    if (!investmentAmount.trim()) {
-      alert("Please enter a valid investment amount.");
-      return;
-    }
-    try {
-      await addDoc(collection(FIREBASE_DB, "Investments"), {
-        userId: currentUser.uid,
-        ideaId,
-        investmentAmount,
-        timestamp: new Date(),
-      });
-      alert("Investment has been recorded!");
-      setInvestmentAmount("");
-      setInvestModalVisible(false);
-    } catch (error) {
-      console.error("Error creating investment:", error);
-      alert("Error creating investment. Check the console for details.");
-    }
-  };
-
-  const filteredCategories = categories.filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   return (
-    <View
-      style={[styles.container, darkMode ? styles.darkMode : styles.lightMode]}
-    >
+    <View style={[styles.container, darkMode ? styles.darkMode : styles.lightMode]}>
       {/* Search Bar */}
-      {/* <PostedIdeas />  */}
-      {/* Icon to access posted ideas */}
-
       <View
-        style={[
-          styles.searchContainer,
-          darkMode ? styles.darkSearch : styles.lightSearch,
-        ]}
+        style={[styles.searchContainer, darkMode ? styles.darkSearch : styles.lightSearch]}
       >
         <Icon
           name="search"
@@ -177,71 +91,95 @@ export default function HomePage() {
         />
       </View>
       <View style={styles.icons}>
-        <TouchableOpacity onPress={() => navigation.navigate("PostedIdeas")}>
-          <Icon name="book" size={24} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("JoinGroups")}>
-          <Icon name="book" size={24} />
-        </TouchableOpacity>
-      </View>
-      <Text
-        style={[styles.title, darkMode ? styles.darkText : styles.lightText]}
-      >
+  <TouchableOpacity
+    style={[
+      styles.iconButton,
+      darkMode ? styles.darkIcon : styles.lightIcon,
+    ]}
+    onPress={() => navigation.navigate("PostedIdeas")}
+  >
+    <Icon name="book" size={24} color={darkMode ? "#fff" : "#333"} />
+  </TouchableOpacity>
+  <TouchableOpacity
+    style={[
+      styles.iconButton,
+      darkMode ? styles.darkIcon : styles.lightIcon,
+    ]}
+    onPress={() => navigation.navigate("JoinGroups")}
+  >
+    <Icon name="group" size={24} color={darkMode ? "#fff" : "#333"} />
+  </TouchableOpacity>
+</View>
+
+      <Text style={[styles.title, darkMode ? styles.darkText : styles.lightText]}>
         Explore Agriculture Categories
       </Text>
 
+      {/* Categories Section */}
       <FlatList
-        data={filteredCategories}
+        data={categories}
         horizontal
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View
-            style={[styles.card, darkMode ? styles.darkCard : styles.lightCard]}
-          >
+          <View style={[styles.card, darkMode ? styles.darkCard : styles.lightCard]}>
             <Image source={{ uri: item.imageUrl }} style={styles.image} />
+            <View>
             <Text
-              style={[
-                styles.cardTitle,
-                darkMode ? styles.darkCardText : styles.lightCardText,
-              ]}
+              style={[styles.cardTitle, darkMode ? styles.darkCardText : styles.lightCardText]}
             >
               {item.title}
             </Text>
             <Text
-              style={[
-                styles.description,
-                darkMode ? styles.darkCardText : styles.lightCardText,
-              ]}
+              style={[styles.description, darkMode ? styles.darkCardText : styles.lightCardText]}
             >
               {item.description}
             </Text>
-            
+            </View>
           </View>
         )}
       />
-      <Modal visible={isPostIdeaModalVisible} transparent animationType="slide">
-        <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Post Your Idea</Text>
-          <TextInput
-            style={[
-              styles.ideaInput,
-              darkMode ? styles.darkText : styles.lightText,
-            ]}
-            placeholder="Enter your idea"
-            placeholderTextColor={darkMode ? "#888" : "#666"}
-            value={ideaContent}
-            onChangeText={setIdeaContent}
-            multiline
-          />
-          <Button title="Post Idea" onPress={handlePostIdea} />
-          <Button
-            title="Cancel"
-            color="red"
-            onPress={() => setPostIdeaModalVisible(false)}
-          />
-        </View>
-      </Modal>
+   
+      <Text style={[styles.title, darkMode ? styles.darkText : styles.lightText]}>
+        Connect with Mentors
+      </Text>
+
+      
+<FlatList
+  data={mentors}
+  showsVerticalScrollIndicator={true} // Show vertical scroll indicator
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => (
+    <View style={[styles.mentorCard, darkMode ? styles.darkCard : styles.lightCard]}>
+      <Image source={{ uri: item.mentorImage }} style={styles.mentorImage} />
+      <View style={styles.mentorDetails}>
+        <Text
+          style={[
+            styles.mentorName,
+            darkMode ? styles.darkCardText : styles.lightCardText,
+          ]}
+        >
+          {item.name}
+        </Text>
+        <Text
+          style={[
+            styles.mentorBio,
+            darkMode ? styles.darkCardText : styles.lightCardText,
+          ]}
+        >
+          {item.bio}
+        </Text>
+        <TouchableOpacity
+          style={styles.contactButton}
+          onPress={() => alert(`Contacting ${item.name}`)}
+        >
+          <Text style={styles.contactButtonText}>Contact</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  )}
+  style={{ marginTop: 10 }} // Add some spacing for the mentor list
+/>
     </View>
   );
 }
@@ -250,12 +188,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    marginTop: 25
   },
   icons: { 
-    display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-evenly',
+    marginBottom: 16, // Add some space below the icons section
   },
+  iconButton: {
+    padding: 10, // Add padding for easier touch interaction
+    borderRadius: 8, // Round the edges for a better UI
+  },
+  darkIcon: {
+    backgroundColor: '#444', 
+    color: '#fff',
+  },
+  lightIcon: {
+    backgroundColor: '#eaeaea', 
+    color: '#333', 
+  },
+  
   title: {
     fontSize: 24,
     fontWeight: "bold",
@@ -307,113 +259,28 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     maxWidth: 320,
     paddingHorizontal: 10,
+    maxHeight: 480,
+    height: 420
   },
   image: {
     width: 300,
     height: 180,
     borderRadius: 12,
-    marginBottom: 16,
+    marginBottom: 5,
     position: "relative",
   },
   cardTitle: {
-    fontSize: 25,
-    fontWeight: "bold",
-    position: "absolute",
-    color: "#000",
-    padding: 8,
+    fontSize: 20, // Adjust font size for the title
+    fontWeight: "bold", // Add space between title and description
+    color: "#333",
   },
 
   description: {
     fontSize: 16,
     color: "#666",
-    // textAlign: 'center',
     marginBottom: 12,
-    paddingHorizontal: 10,
+    flexWrap: "wrap", 
   },
-  joinButton: {
-    backgroundColor: "#4CAF50",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginVertical: 6,
-    width: "40%",
-    alignItems: "center",
-    marginHorizontal: 10,
-  },
-  joinButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  modalView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    padding: 24,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  ideaInput: {
-    width: "80%",
-    padding: 12,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    marginBottom: 20,
-    fontSize: 16,
-    color: "#333",
-  },
-  modalButton: {
-    backgroundColor: "#4CAF50",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginVertical: 6,
-    width: "80%",
-    alignItems: "center",
-  },
-  modalButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  cancelButton: {
-    backgroundColor: "red",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginVertical: 6,
-    width: "80%",
-    alignItems: "center",
-  },
-  cancelButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  joinButtonContainer: {
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  modalInputContainer: {
-    width: "80%",
-    marginBottom: 20,
-  },
-  modalActionContainer: {
-    width: "100%",
-    alignItems: "center",
-  },
-
-  // Specific tweaks for dark mode
   darkCard: {
     backgroundColor: "#333",
   },
@@ -447,5 +314,54 @@ const styles = StyleSheet.create({
   buto: {
     display: "flex",
     flexDirection: "row",
+  },
+  contactButton: {
+    backgroundColor: "#4CAF50",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginTop: 10,
+    width: '50%',
+    alignSelf: 'center'
+  },
+  contactButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+    
+  },
+  mentorCard: {
+    flexDirection: "row", // Align items horizontally
+    alignItems: "flex-start", // Align items at the top
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    padding: 10,
+    marginBottom: 16, // Add space between cards
+  },
+  mentorImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+    marginRight: 12, // Space between image and details
+  },
+  mentorDetails: {
+    flex: 1, // Allow details to take up remaining space
+  },
+  mentorName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+    textAlign: 'center'
+  },
+  mentorBio: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 12,
+    //  textAlign: 'center'
   },
 });

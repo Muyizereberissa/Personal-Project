@@ -150,6 +150,9 @@ export default function JoinGroups() {
       style={[styles.container, darkMode ? styles.darkMode : styles.lightMode]}
     >
         <View />
+        <View>
+          <Text> </Text>
+        </View>
       <FlatList
         data={filteredCategories}
         vertical
@@ -253,6 +256,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    marginTop: 20
   },
   title: {
     fontSize: 24,
@@ -273,26 +277,8 @@ const styles = StyleSheet.create({
   lightText: {
     color: "#333",
   },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#eaeaea",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 20,
-  },
   searchIcon: {
     marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: "#fff",
-    color: "#333",
   },
   card: {
     backgroundColor: "#fff",
