@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router"; // Import useRouter
+import { useRouter } from "expo-router"; 
 import {
   StyleSheet,
   SafeAreaView,
@@ -10,35 +10,35 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useRef, useState } from "react";
-import { UseAuth } from "../Context/ContextProvider"; // Import the UseAuth context
+import { UseAuth } from "../Context/ContextProvider";
 
 const { width, height } = Dimensions.get("window");
 
 export default function Index() {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const router = useRouter(); // Initialize router
-  const { darkMode } = UseAuth(); // Get the darkMode state from context
+  const router = useRouter(); 
+  const { darkMode } = UseAuth(); 
 
   const slides = [
     {
       id: "1",
       image: require("../assets/images/onboard3.jpeg"),
-      title: "Agriculture, our concern",
-      subtitle: "Let us share our passion in agriculture",
+      title: "Turn Your Passion into Profit!",
+      subtitle: "Explore exciting opportunities in modern agriculture and turn your passion into profit!",
     },
     {
       id: "2",
       image: require("../assets/images/onboard1.jpeg"),
-      title: "Innovate and Cultivate",
+      title: "Get the Resources You Need!",
       subtitle:
-        "Bring your fresh ideas to the field. Together, we’re transforming agriculture for a sustainable tomorrow",
+        "Access mentorship, funding, and a supportive community to grow your agribusiness.",
     },
     {
       id: "3",
       image: require("../assets/images/onboard4.jpeg"),
-      title: "From Seed to Success",
+      title: "Lead the Innovation!",
       subtitle:
-        "Join a community that nurtures your journey in agriculture. Your passion can make a difference.",
+        "Embrace innovation and transform agriculture with cutting-edge technology!",
     },
   ];
 
@@ -57,22 +57,18 @@ export default function Index() {
         />
         <View style={{ height: 20 }} />
         <Text
-          style={{
-            fontSize: 22,
-            fontWeight: "bold",
-            marginTop: 10,
-            marginLeft: 10,
-            color: darkMode ? "#fff" : "#000", // Adjust text color based on dark mode
-          }}
+          style={[
+            styles.title,
+            { color: darkMode ? "#fff" : "#000" }, 
+          ]}
         >
           {item.title}
         </Text>
         <Text
-          style={{
-            fontSize: 20,
-            maxHeight: "70%",
-            color: darkMode ? "#ccc" : "#333", // Adjust subtitle color based on dark mode
-          }}
+          style={[
+            styles.subtitle,
+            { color: darkMode ? "#ccc" : "#333" }, 
+          ]}
         >
           {item.subtitle}
         </Text>
@@ -134,7 +130,7 @@ export default function Index() {
                   styles.btn,
                   {
                     backgroundColor: "transparent",
-                    borderWidth: 1,
+                    borderWidth: 0.2,
                     borderColor: darkMode ? "white" : "black",
                   },
                 ]}
@@ -142,7 +138,7 @@ export default function Index() {
               >
                 <Text
                   style={{
-                    color: darkMode ? "white" : "black",
+                    color: darkMode ? "green" : "green",
                     fontSize: 15,
                     fontWeight: "bold",
                   }}
@@ -200,16 +196,7 @@ export default function Index() {
         darkMode ? styles.darkContainer : styles.lightContainer,
       ]}
     >
-      <Text
-        style={{
-          color: darkMode ? "#fff" : "#000",
-          fontSize: 24,
-          textAlign: "center",
-          marginVertical: 20,
-        }}
-      >
-        Onboarding screen
-      </Text>
+
       <FlatList
         ref={ref}
         onMomentumScrollEnd={updateCurrentSlideIndex}
@@ -239,7 +226,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   indicator: {
-    height: 2.5,
+    height: 5.5,
     gap: 10,
     width: 10,
     backgroundColor: "grey",
@@ -263,5 +250,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
+  },
+  title: {
+    fontSize: 26, 
+    fontWeight: "bold", 
+    textAlign: "center",
+    marginVertical: 10, 
+  },
+  subtitle: {
+    fontSize: 18, 
+    fontWeight: "500", 
+    textAlign: "center", 
+    marginHorizontal: 20, 
+    lineHeight: 24, 
   },
 });

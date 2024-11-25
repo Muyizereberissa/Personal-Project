@@ -18,7 +18,7 @@ export default function BottomTabs() {
         tabBarStyle: {
           backgroundColor: darkMode ? "#000" : "#fff",
         },
-        tabBarActiveTintColor: darkMode ? "#1E992C" : "#007AFF",
+        tabBarActiveTintColor: darkMode ? "green" : "green",
         tabBarInactiveTintColor: darkMode ? "#777" : "#888",
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
@@ -33,9 +33,9 @@ export default function BottomTabs() {
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen name="Home" component={HomeScreen}/>
+      <Tab.Screen name="Profile" component={ProfileScreen}/>
+      <Tab.Screen name="Settings" component={SettingsScreen}/>
     </Tab.Navigator>
   );
 }

@@ -15,7 +15,6 @@ import { FIREBASE_DB } from "../FirebaseConfig";
 import { collection, getDocs, addDoc, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { UseAuth } from "../Context/ContextProvider"; // Import context
-import PostedIdeas from "./PostedIdeas";
 import { useNavigation } from "@react-navigation/native";
 
 export default function JoinGroups() {
@@ -39,7 +38,7 @@ export default function JoinGroups() {
       try {
         const categoryCollection = collection(
           FIREBASE_DB,
-          "AgricultureCategories"
+          "Groups"
         );
         const categorySnapshot = await getDocs(categoryCollection);
         const categoryList = categorySnapshot.docs.map((doc) => ({
@@ -83,13 +82,17 @@ export default function JoinGroups() {
         categoryId,
       });
       alert("Successfully joined the group!");
-      console.log("Group joined successfully for category:", categoryId);
+      navigation.navigate("GroupDetails", {
+        groupId: categoryId,
+        groupName: selectedCategory.title,
+      });
     } catch (error) {
       console.error("Error joining group:", error);
       alert("Error joining group. Check the console for details.");
     }
     setJoinModalVisible(false);
   };
+  
 
   const handlePostIdea = async () => {
     if (!currentUser) {
@@ -162,7 +165,7 @@ export default function JoinGroups() {
           <View
             style={[styles.card, darkMode ? styles.darkCard : styles.lightCard]}
           >
-            <Image source={{ uri: item.imageUrl }} style={styles.image} />
+            <Image source={{ uri: item.groupImage }} style={styles.image} />
             <Text
               style={[
                 styles.cardTitle,
@@ -177,7 +180,7 @@ export default function JoinGroups() {
                 darkMode ? styles.darkCardText : styles.lightCardText,
               ]}
             >
-              {item.description}
+              {item.groupDescription}
             </Text>
             <View style={styles.buto}>
               <TouchableOpacity
@@ -208,9 +211,6 @@ export default function JoinGroups() {
           </View>
         )}
       />
-
- 
-
       {/* Modals */}
       <Modal visible={isJoinModalVisible} transparent animationType="slide">
         <View style={styles.modalView}>
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    marginTop: 20
+    marginTop: 20,
   },
   title: {
     fontSize: 24,
@@ -264,78 +264,84 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: "center",
   },
-  // post: {}
   darkMode: {
-    backgroundColor: "#222",
+    backgroundColor: "#121212",
   },
   lightMode: {
     backgroundColor: "#f9f9f9",
   },
   darkText: {
-    color: "#fff",
+    color: "#e0e0e0",
   },
   lightText: {
     color: "#333",
-  },
-  searchIcon: {
-    marginRight: 8,
   },
   card: {
     backgroundColor: "#fff",
     borderRadius: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    padding: 16,
+    marginBottom: 16,
     alignItems: "center",
-    flexDirection: "column",
-    maxWidth: 320,
-    paddingHorizontal: 10
+  },
+  darkCard: {
+    backgroundColor: "#1e1e1e",
+  },
+  lightCard: {
+    backgroundColor: "#ffffff",
+  },
+  darkCardText: {
+    color: "#e0e0e0",
+  },
+  lightCardText: {
+    color: "#333",
   },
   image: {
-    width: 300,
+    width: "100%",
     height: 180,
-    borderRadius: 12,
-    marginBottom: 16,
-    position: 'relative'
+    borderRadius: 8,
+    marginBottom: 12,
   },
   cardTitle: {
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: "bold",
-    position: 'absolute',
-    bottom: 175,
-    left: 5,      
-    color: '#000', 
-    padding: 8    
+    textAlign: "center",
+    marginBottom: 8,
   },
-  
   description: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#666",
-    // textAlign: 'center',
+    textAlign: "center",
     marginBottom: 12,
-    paddingHorizontal: 10,
   },
   joinButton: {
     backgroundColor: "#4CAF50",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
-    marginVertical: 6,
-    width: "40%",
     alignItems: "center",
-    marginHorizontal: 10,
+    justifyContent: "center",
+    flex: 1,
+    marginHorizontal: 5,
   },
   joinButtonText: {
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  buto: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
   },
   modalView: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     padding: 24,
   },
   modalTitle: {
@@ -346,20 +352,20 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   ideaInput: {
-    width: "80%",
+    width: "90%",
     padding: 12,
-    backgroundColor: "#fff",
+    backgroundColor: "#f0f0f0",
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#ddd",
-    marginBottom: 20,
+    borderColor: "#ccc",
+    marginBottom: 16,
     fontSize: 16,
     color: "#333",
   },
   modalButton: {
     backgroundColor: "#4CAF50",
     paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     borderRadius: 8,
     marginVertical: 6,
     width: "80%",
@@ -368,12 +374,12 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "600",
   },
   cancelButton: {
     backgroundColor: "red",
     paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     borderRadius: 8,
     marginVertical: 6,
     width: "80%",
@@ -382,56 +388,13 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "600",
   },
-  joinButtonContainer: {
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  modalInputContainer: {
-    width: "80%",
-    marginBottom: 20,
-  },
-  modalActionContainer: {
-    width: "100%",
-    alignItems: "center",
-  },
-
-  // Specific tweaks for dark mode
-  darkCard: {
-    backgroundColor: "#333",
-  },
-  lightCard: {
-    backgroundColor: "#fff",
-  },
-  darkCardText: {
-    color: "#fff",
-  },
-  lightCardText: {
-    color: "#333",
-  },
+  // Improved buttons for light/dark themes
   darkButton: {
     backgroundColor: "#4CAF50",
   },
   lightButton: {
     backgroundColor: "#4CAF50",
   },
-  darkSearch: {
-    backgroundColor: "#444",
-  },
-  lightSearch: {
-    backgroundColor: "#eaeaea",
-  },
-  darkButtonText: {
-    color: "#fff",
-  },
-  lightButtonText: {
-    color: "#fff",
-  },
-  buto: {
-    display: 'flex',
-    flexDirection: 'row'
-  }
 });

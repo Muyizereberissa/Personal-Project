@@ -2,17 +2,48 @@ import React from "react";
 import { View, Text, StyleSheet, Switch, TouchableOpacity, Alert } from "react-native";
 import { UseAuth } from "../Context/ContextProvider";
 import { useNavigation } from "@react-navigation/native";
+import { getAuth, signOut } from "firebase/auth";
 
 export default function SettingsScreen() {
   const { darkMode, toggleDarkMode } = UseAuth();
   const navigation = useNavigation();
+  const auth = getAuth();
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Confirm Logout",
+      "Are you sure you want to log out?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await signOut(auth);
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "Login" }], // Ensure user can't go back to authenticated screens
+              });
+            } catch (error) {
+              Alert.alert("Error", "Failed to log out. Please try again.");
+              console.error("Logout error:", error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   const handleNotificationsToggle = () => {
     Alert.alert("Notifications", "This feature will be implemented soon!");
   };
 
   const handleAccountSettings = () => {
-    // Navigate to Account Settings screen if you have one
     navigation.navigate("AccountSettingsScreen");
   };
 
@@ -24,7 +55,7 @@ export default function SettingsScreen() {
       <View style={styles.settingItem}>
         <Text style={[styles.settingText, { color: darkMode ? "#fff" : "#000" }]}>Dark Mode</Text>
         <Switch
-          value={darkMode}
+          value={darkMode}   
           onValueChange={toggleDarkMode}
           thumbColor={darkMode ? "#f5dd4b" : "#f4f3f4"}
           trackColor={{ false: "#767577", true: "#81b0ff" }}
@@ -35,7 +66,7 @@ export default function SettingsScreen() {
       <View style={styles.settingItem}>
         <Text style={[styles.settingText, { color: darkMode ? "#fff" : "#000" }]}>Notifications</Text>
         <Switch
-          value={false} // Replace with actual notification state if applicable
+          value={false}
           onValueChange={handleNotificationsToggle}
           thumbColor={darkMode ? "#f5dd4b" : "#f4f3f4"}
           trackColor={{ false: "#767577", true: "#81b0ff" }}
@@ -48,17 +79,19 @@ export default function SettingsScreen() {
       </TouchableOpacity>
 
       {/* Sign Out */}
-      <TouchableOpacity style={styles.signOutButton} onPress={() => Alert.alert("Sign Out", "Signing out...")}>
+      <TouchableOpacity style={styles.signOutButton} onPress={handleLogout}>
         <Text style={styles.signOutText}>Sign Out</Text>
       </TouchableOpacity>
+    
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: 20,
+    top: 50
   },
   darkContainer: {
     backgroundColor: "#121212",

@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { UseAuth } from "../Context/ContextProvider";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"; // Import icon library
@@ -26,7 +32,7 @@ export default function Login() {
       if (Object.keys(formErrors).length === 0 && isSubmit) {
         try {
           await login(formValues.email, formValues.password);
-          navigation.navigate("BottomTabs"); // Only navigate after successful login
+          navigation.navigate("BottomTabs");
         } catch (error) {
           console.error("Login error", error);
         }
@@ -57,62 +63,78 @@ export default function Login() {
 
   return (
     <View style={[styles.container, darkMode ? styles.dark : styles.light]}>
-        <Text style={styles.title}>Log in</Text>
+      <Text style={styles.title}>Log in</Text>
 
-        <View style={styles.inputWrapper}>
-          <Icon name="email-outline" size={25} color="#1E992C" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Enter email"
-            value={formValues.email}
-            onChangeText={(value) => handleChange("email", value)}
-            placeholderTextColor="#aaa"
-          />
-        </View>
-        {formErrors.email && <Text style={styles.errorText}>{formErrors.email}</Text>}
+      <View style={styles.inputWrapper}>
+        <Icon
+          name="email-outline"
+          size={25}
+          color="#1E992C"
+          style={styles.icon}
+        />
+        <TextInput
+          style={[styles.input, { color: darkMode ? "#fff" : "#333" }]}
+          placeholder="Enter email"
+          value={formValues.email}
+          onChangeText={(value) => handleChange("email", value)}
+          placeholderTextColor={darkMode ? "#aaa" : "#777"}
+        />
+      </View>
+      {formErrors.email && (
+        <Text style={styles.errorText}>{formErrors.email}</Text>
+      )}
 
-        <View style={styles.inputWrapper}>
-          <Icon name="lock-outline" size={25} color="#1E992C" style={styles.icon} />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            secureTextEntry
-            value={formValues.password}
-            onChangeText={(value) => handleChange("password", value)}
-            placeholderTextColor="#aaa"
-          />
-        </View>
-        {formErrors.password && <Text style={styles.errorText}>{formErrors.password}</Text>}
+      <View style={styles.inputWrapper}>
+        <Icon
+          name="lock-outline"
+          size={25}
+          color="#1E992C"
+          style={styles.icon}
+        />
+        <TextInput
+          style={[styles.input, { color: darkMode ? "#fff" : "#333" }]}
+          placeholder="Password"
+          secureTextEntry
+          value={formValues.password}
+          onChangeText={(value) => handleChange("password", value)}
+          placeholderTextColor={darkMode ? "#aaa" : "#777"}
+        />
+      </View>
+      {formErrors.password && (
+        <Text style={styles.errorText}>{formErrors.password}</Text>
+      )}
 
-        <TouchableOpacity style={styles.forgotPassword} onPress={() => navigation.navigate("ForgotPassword")}>
-          <Text style={styles.linkText}>Forgot Password?</Text>
+      <TouchableOpacity
+        style={styles.forgotPassword}
+        onPress={() => navigation.navigate("ForgotPassword")}
+      >
+        <Text style={styles.linkText}>Forgot Password?</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+      <View />
+      <Text style={styles.orText}>Or log in with</Text>
+      <View />
+      <View style={styles.socialIconsContainer}>
+        <TouchableOpacity style={styles.socialIcon}>
+          <Icon name="google" size={30} color="#DB4437" />
         </TouchableOpacity>
-
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Login</Text>
+        <TouchableOpacity style={styles.socialIcon}>
+          <Icon name="facebook" size={30} color="#4267B2" />
         </TouchableOpacity>
-        <View/>
-          <Text style={styles.orText}>Or log in with</Text>
-        <View/>
-        <View style={styles.socialIconsContainer}>
-          <TouchableOpacity style={styles.socialIcon}>
-            <Icon name="google" size={30} color="#DB4437" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.socialIcon}>
-            <Icon name="facebook" size={30} color="#4267B2" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.socialIcon}>
-            <Icon name="twitter" size={30} color="#1DA1F2" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.socialIcon}>
+          <Icon name="twitter" size={30} color="#1DA1F2" />
+        </TouchableOpacity>
+      </View>
 
-        <View style={styles.signupContainer}>
-          <Text style={styles.signupText}>Don't have an account?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-            <Text style={styles.linkText}>Sign Up</Text>
-          </TouchableOpacity>
-        </View>
-     
+      <View style={styles.signupContainer}>
+        <Text style={styles.signupText}>Don't have an account?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+          <Text style={styles.linkText}>Sign Up</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

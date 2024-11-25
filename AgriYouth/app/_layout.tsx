@@ -18,6 +18,7 @@ export default function RootLayout() {
         <Stack.Screen name="UpdateProfile"/>
         <Stack.Screen name="PostedIdeas"/>
         <Stack.Screen name="JoinGroups"/>
+        <Stack.Screen name="GroupDetails"/>
       </Stack>
     </ThemeContext>
   );

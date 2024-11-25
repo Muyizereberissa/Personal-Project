@@ -14,7 +14,7 @@ export default function Register() {
   const { register, darkMode } = UseAuth();
 
   const handleChange = (name, value) => {
-    setFormValues({ ...formValues, [name]: value });
+    setFormValues({ ...formValues, [name]: value });       
   };
 
   const handleSubmit = () => {

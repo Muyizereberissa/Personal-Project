@@ -1,24 +1,37 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { UseAuth } from '../Context/ContextProvider';
-import { launchImageLibrary } from 'react-native-image-picker';
+import React, { useState, useContext } from "react";
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert ,Linking} from "react-native";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { UseAuth } from "../Context/ContextProvider";
+import { launchImageLibrary } from "react-native-image-picker";
+import { useNavigation } from "@react-navigation/native";
 
 export default function Profile() {
   const { darkMode } = UseAuth();
   const [profileImage, setProfileImage] = useState(null);
+  const navigation = useNavigation(); // Hook for navigation
 
   // Function to handle image selection
   const selectImage = () => {
-    launchImageLibrary({ mediaType: 'photo' }, (response) => {
-      if (response.didCancel) {
-        console.log("User cancelled image picker");
-      } else if (response.errorMessage) {
-        console.log("Image picker error: ", response.errorMessage);
-      } else if (response.assets) {
-        setProfileImage(response.assets[0].uri);
+    launchImageLibrary(
+      { mediaType: "photo" },
+      (response) => {
+        if (response.didCancel) {
+          Alert.alert("Cancelled", "Image selection was cancelled.");
+        } else if (response.errorMessage) {
+          Alert.alert("Error", `Image picker error: ${response.errorMessage}`);
+        } else if (response.assets) {
+          setProfileImage(response.assets[0].uri);
+        }
       }
-    });
+    );
+  };
+
+  // Function to handle message button press
+  const sendMessage = () => {
+    // Navigate to a chat screen or open email client
+    // navigation.navigate("ChatScreen", { userName: "Berissa Muyizere" });
+    // Alternatively, for email:
+    Linking.openURL('mailto:your-email@example.com?subject=Contact&body=Hello');
   };
 
   return (
@@ -57,7 +70,7 @@ export default function Profile() {
           <Icon name="account-edit" size={20} color="#fff" />
           <Text style={styles.buttonText}>Edit Profile</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity style={styles.actionButton} onPress={sendMessage}>
           <Icon name="message-text" size={20} color="#fff" />
           <Text style={styles.buttonText}>Message</Text>
         </TouchableOpacity>
@@ -66,7 +79,7 @@ export default function Profile() {
       <View style={styles.aboutContainer}>
         <Text style={[styles.sectionTitle, darkMode ? styles.darkText : styles.lightText]}>About</Text>
         <Text style={[styles.aboutText, darkMode ? styles.darkText : styles.lightText]}>
-          Hi, I'm Berissa! I'm passionate about using technology to solve real-world problems mainly agriculture, education, and unemployment related problems.
+          Hi, I'm Berissa! I'm passionate about using technology to solve real-world problems mainly agriculture, education, and unemployment-related problems.
         </Text>
       </View>
 
@@ -100,6 +113,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 16,
     alignItems: "center",
+    top:50
   },
   darkContainer: {
     backgroundColor: "#000",

@@ -7,12 +7,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  Modal,
-  Button,
+  Linking,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { FIREBASE_DB } from "../FirebaseConfig";
-import { collection, getDocs, addDoc } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { UseAuth } from "../Context/ContextProvider";
 import { useNavigation } from "@react-navigation/native";
@@ -20,14 +19,11 @@ import { useNavigation } from "@react-navigation/native";
 export default function HomePage() {
   const { darkMode } = UseAuth();
   const [categories, setCategories] = useState([]);
-  const [mentors, setMentors] = useState([]); // State for mentors
+  const [mentors, setMentors] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isPostIdeaModalVisible, setPostIdeaModalVisible] = useState(false);
-  const [ideaContent, setIdeaContent] = useState("");
 
   const navigation = useNavigation();
   const auth = getAuth();
-  const currentUser = auth.currentUser;
 
   // Fetch categories
   useEffect(() => {
@@ -65,11 +61,26 @@ export default function HomePage() {
     fetchMentors();
   }, []);
 
-  const handleSearch = (text) => setSearchQuery(text);
+  // Filter data based on search query
+  const filteredCategories = categories.filter((category) =>
+    category.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const filteredMentors = mentors.filter((mentor) =>
+    mentor.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleContact = (email) => {
+    const mailto = `mailto:${email}`;
+    Linking.openURL(mailto).catch((error) =>
+      console.error("Error opening email client:", error)
+    );
+  };
 
   return (
+    
     <View style={[styles.container, darkMode ? styles.darkMode : styles.lightMode]}>
       {/* Search Bar */}
+      
       <View
         style={[styles.searchContainer, darkMode ? styles.darkSearch : styles.lightSearch]}
       >
@@ -84,32 +95,27 @@ export default function HomePage() {
             styles.searchInput,
             darkMode ? styles.darkText : styles.lightText,
           ]}
-          placeholder="Search Categories..."
+          placeholder="Search Categories or Mentors..."
           placeholderTextColor={darkMode ? "#888" : "#666"}
           value={searchQuery}
-          onChangeText={handleSearch}
+          onChangeText={setSearchQuery}
         />
       </View>
+
       <View style={styles.icons}>
-  <TouchableOpacity
-    style={[
-      styles.iconButton,
-      darkMode ? styles.darkIcon : styles.lightIcon,
-    ]}
-    onPress={() => navigation.navigate("PostedIdeas")}
-  >
-    <Icon name="book" size={24} color={darkMode ? "#fff" : "#333"} />
-  </TouchableOpacity>
-  <TouchableOpacity
-    style={[
-      styles.iconButton,
-      darkMode ? styles.darkIcon : styles.lightIcon,
-    ]}
-    onPress={() => navigation.navigate("JoinGroups")}
-  >
-    <Icon name="group" size={24} color={darkMode ? "#fff" : "#333"} />
-  </TouchableOpacity>
-</View>
+        <TouchableOpacity
+          style={[styles.iconButton, darkMode ? styles.darkIcon : styles.lightIcon]}
+          onPress={() => navigation.navigate("PostedIdeas")}
+        >
+          <Icon name="book" size={24} color="green" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.iconButton, darkMode ? styles.darkIcon : styles.lightIcon]}
+          onPress={() => navigation.navigate("JoinGroups")}
+        >
+          <Icon name="group" size={26} color="green" />
+        </TouchableOpacity>
+      </View>
 
       <Text style={[styles.title, darkMode ? styles.darkText : styles.lightText]}>
         Explore Agriculture Categories
@@ -117,7 +123,7 @@ export default function HomePage() {
 
       {/* Categories Section */}
       <FlatList
-        data={categories}
+        data={filteredCategories}
         horizontal
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.id}
@@ -125,75 +131,75 @@ export default function HomePage() {
           <View style={[styles.card, darkMode ? styles.darkCard : styles.lightCard]}>
             <Image source={{ uri: item.imageUrl }} style={styles.image} />
             <View>
-            <Text
-              style={[styles.cardTitle, darkMode ? styles.darkCardText : styles.lightCardText]}
-            >
-              {item.title}
-            </Text>
-            <Text
-              style={[styles.description, darkMode ? styles.darkCardText : styles.lightCardText]}
-            >
-              {item.description}
-            </Text>
+              <Text
+                style={[styles.cardTitle, darkMode ? styles.darkCardText : styles.lightCardText]}
+              >
+                {item.title}
+              </Text>
+              <Text
+                style={[styles.description, darkMode ? styles.darkCardText : styles.lightCardText]}
+              >
+                {item.description}
+              </Text>
             </View>
           </View>
         )}
       />
-   
+    <View></View>
       <Text style={[styles.title, darkMode ? styles.darkText : styles.lightText]}>
         Connect with Mentors
       </Text>
 
-      
-<FlatList
-  data={mentors}
-  showsVerticalScrollIndicator={true} // Show vertical scroll indicator
-  keyExtractor={(item) => item.id}
-  renderItem={({ item }) => (
-    <View style={[styles.mentorCard, darkMode ? styles.darkCard : styles.lightCard]}>
-      <Image source={{ uri: item.mentorImage }} style={styles.mentorImage} />
-      <View style={styles.mentorDetails}>
-        <Text
-          style={[
-            styles.mentorName,
-            darkMode ? styles.darkCardText : styles.lightCardText,
-          ]}
-        >
-          {item.name}
-        </Text>
-        <Text
-          style={[
-            styles.mentorBio,
-            darkMode ? styles.darkCardText : styles.lightCardText,
-          ]}
-        >
-          {item.bio}
-        </Text>
-        <TouchableOpacity
-          style={styles.contactButton}
-          onPress={() => alert(`Contacting ${item.name}`)}
-        >
-          <Text style={styles.contactButtonText}>Contact</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  )}
-  style={{ marginTop: 10 }} // Add some spacing for the mentor list
-/>
+      {/* Mentors Section */}
+      <FlatList
+        data={filteredMentors}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={[styles.mentorCard, darkMode ? styles.darkCard : styles.lightCard]}>
+            <Image source={{ uri: item.mentorImage }} style={styles.mentorImage} />
+            <View style={styles.mentorDetails}>
+              <Text
+                style={[
+                  styles.mentorName,
+                  darkMode ? styles.darkCardText : styles.lightCardText,
+                ]}
+              >
+                {item.name}
+              </Text>
+              <Text
+                style={[
+                  styles.mentorBio,
+                  darkMode ? styles.darkCardText : styles.lightCardText,
+                ]}
+              >
+                {item.bio}
+              </Text>
+              <TouchableOpacity
+                style={styles.contactButton}
+                onPress={() => handleContact(item.email)}
+              >
+                <Text style={styles.contactButtonText}>Contact</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      />
     </View>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    marginTop: 25
+    top:50
   },
   icons: { 
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginBottom: 16, // Add some space below the icons section
+    marginBottom: 10, // Add some space below the icons section
   },
   iconButton: {
     padding: 10, // Add padding for easier touch interaction
@@ -211,7 +217,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 16,
+    marginBottom: 5,
     textAlign: "center",
   },
   // post: {}
@@ -259,8 +265,8 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     maxWidth: 320,
     paddingHorizontal: 10,
-    maxHeight: 480,
-    height: 420
+    maxHeight: 800,
+    height: 790
   },
   image: {
     width: 300,
@@ -270,7 +276,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   cardTitle: {
-    fontSize: 20, // Adjust font size for the title
+    fontSize: 20, 
     fontWeight: "bold", // Add space between title and description
     color: "#333",
   },
@@ -332,8 +338,8 @@ const styles = StyleSheet.create({
     
   },
   mentorCard: {
-    flexDirection: "row", // Align items horizontally
-    alignItems: "flex-start", // Align items at the top
+    flexDirection: "row", 
+    alignItems: "flex-start", 
     backgroundColor: "#fff",
     borderRadius: 12,
     shadowColor: "#000",
@@ -341,27 +347,30 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     padding: 10,
-    marginBottom: 16, // Add space between cards
+    marginBottom: 3, 
   },
   mentorImage: {
     width: 120,
     height: 120,
     borderRadius: 12,
-    marginRight: 12, // Space between image and details
+    marginRight: 12, 
   },
   mentorDetails: {
-    flex: 1, // Allow details to take up remaining space
+    flex: 1, 
+    display:'flex',
+   marginLeft:10
   },
   mentorName: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 8,
-    textAlign: 'center'
+    // textAlign: 'center'
   },
   mentorBio: {
     fontSize: 14,
+    // marginLeft: 10,
     color: "#666",
-    marginBottom: 12,
+    marginBottom: 3,
     //  textAlign: 'center'
   },
 });
