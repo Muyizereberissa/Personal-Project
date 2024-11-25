@@ -19,24 +19,18 @@ Before setting up the project, ensure you have the following installed:
 
 1. **Node.js**: Download and install from [Node.js](https://nodejs.org).
 2. **Yarn**: Install globally by running:
-   ```bash
-   npm install --global yarn
+ - **Git**: Install from the [Git official website](https://git-scm.com/).
+- **Android Studio** (for Android emulator) or **Xcode** (for iOS simulator):
+  - Download and set up [Android Studio](https://developer.android.com/studio).
+  - For iOS, Xcode comes pre-installed on macOS.
 
-   Expo CLI: Install globally by running:
-bash
-Copy code
-npm install --global expo-cli
-Git: Install from Git.
-Android Studio (for Android emulator) or Xcode (for iOS simulator):
-Download and set up Android Studio.
-For iOS, Xcode comes pre-installed on macOS.
-Installation
-Clone the Repository: Open your terminal and run:
+## Installation
 
-bash
-Copy code
+### Clone the Repository
+Open your terminal and run:
+```bash
 git clone <repository-url>
-Replace <repository-url> with the link to the GitHub repository.
+
 
 Navigate to the Project Directory:
 
